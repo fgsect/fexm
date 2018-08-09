@@ -1,0 +1,69 @@
+<html>
+
+    <head>
+        <title>Telnet client using WebSockets</title>
+        <script src="/static/libs/jquery.min.js"></script>
+        <script src="/static/ws/websock.js"></script>
+        <script src="/static/ws/keysym.js"></script>
+        <script src="/static/ws/VT100.js"></script>
+        <script src="/static/ws/wstelnet.js"></script>
+    </head>
+
+    <body>
+        <label for='host'>Host:</label><input id='host' style='width:100px'>&nbsp;
+        <label for='port'>Post:</label><input id='port' style='width:50px'>&nbsp;
+        <label for='encrypt'>Encrypt</label><input id='encrypt' type='checkbox'>&nbsp;
+        <input id='connectButton' type='button' value='Connect' style='width:100px'
+            onclick="connect();">&nbsp;
+
+        <br><br>
+
+        <pre id="terminal"></pre>
+
+        <script>
+            var telnet;
+
+            function connect() {
+                var btn = $('#connectButton')[0];
+                telnet.connect($('#host')[0].value,
+                               $('#port')[0].value,
+                               $('#encrypt')[0].checked);
+                btn.disabled = true;
+                btn.value = "Connecting";
+            }
+
+            function disconnect() {
+                var btn = $('#connectButton')[0];
+                btn.disabled = true;
+                btn.value = "Disconnecting";
+                telnet.disconnect();
+            }
+
+            function connected() {
+                var btn = $('#connectButton')[0];
+                btn.disabled = false;
+                btn.value = "Disconnect";
+                btn.onclick = disconnect;
+            }
+
+            function disconnected() {
+                var btn = $('#connectButton')[0];
+                btn.disabled = false;
+                btn.value = "Connect";
+                btn.onclick = connect;
+            }
+
+            window.onload = function() {
+                console.log("onload");
+
+                var url = document.location.href;
+                $('#host')[0].value = (url.match(/host=([^&#]*)/) || ['',''])[1];
+                $('#port')[0].value = (url.match(/port=([^&#]*)/) || ['',''])[1];
+
+                telnet = Telnet('terminal', connected, disconnected);
+            }
+        </script>
+
+    </body>
+
+</html>

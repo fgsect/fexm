@@ -1,0 +1,4 @@
+docker_scripts/afl_base_image
+tests
+.idea
+env

@@ -1,0 +1,3 @@
+SHM_ENV_VAR = "__AFL_SHM_ID"
+ASAN_LIBRARY_STRING = "libasan.so"
+CRASH_EXECUTE_LOG_COLUMN = "Crash_Execute_log"

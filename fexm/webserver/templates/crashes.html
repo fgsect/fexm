@@ -1,0 +1,173 @@
+<html>
+<head>
+    <title>
+        Bug Bounty Bash Board
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/static/libs/bootstrap.min.css"/>
+
+    <style type="text/css">
+        td {
+            padding: 0 25px 0 25px;
+        }
+
+        .overlay {
+            position: fixed;
+            display: none;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 5%;
+            right: 5%;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 1);
+            /*z-index: 2;*/
+            cursor: pointer;
+            overflow-y: scroll
+        }
+
+        #text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 50px;
+            color: white;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+        }
+
+
+    </style>
+
+    <script>
+        function on(id) {
+            document.getElementById(id).style.display = "block";
+        }
+
+        function off(id) {
+            document.getElementById(id).style.display = "none";
+        }
+    </script>
+
+</head>
+<body>
+
+<h1>Package: {{ binary_data.package }}, Binary: {{ binary_data.name }}</h1>
+
+{% if message %}
+    <div class="alert alert-success" role="alert">
+        {{ message }}
+    </div>
+{% endif %}
+
+<table class="display responsive no-wrap" id="overview">
+    <thead>
+    <tr>
+        <th>Unique crashes</th>
+        <th>Worst Crash</th>
+        <th>Total executions</th>
+        <th>Execs/s</th>
+        <th>Fuzzer</th>
+        <th>Pending Total</th>
+        <th>Pending Favs</th>
+        <th>Paths Total</th>
+        <th>Afl unique crashes</th>
+        <th>Timewarp?</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if binary_data.overall_worst_crash == "EXPLOITABLE" %}
+        {% set ordering = 6 %}
+        <tr rowspan="1" class="danger">
+            {% elif binary_data.overall_worst_crash == "PROBABLY_EXPLOITABLE" %}
+            {% set ordering = 5 %}
+        <tr rowspan="1" class="danger">
+            {% elif binary_data.overall_worst_crash == "UNKNOWN" %}
+            {% set ordering = 4 %}
+        <tr rowspan="1" class="warning">
+            {% elif binary_data.overall_worst_crash == "PROBABLY_NOT_EXPLOITABLE" %}
+            {% set ordering = 3 %}
+        <tr rowspan="1" class="info">
+            {% elif binary_data.overall_worst_crash == "NOT_EXPLOITABLE" %}
+            {% set ordering = 2 %}
+        <tr rowspan="1" class="info">
+            {% else %}
+            {% set ordering = 1 %}
+        <tr rowspan="1" class="success">
+    {% endif %}
+    <td data-order="{{ ordering }}">{{ binary_data.overall_worst_crash }}</td>
+    <td>{{ binary_data.fuzz_stats["execs_done"] }}</td>
+    <td>{{ binary_data.fuzz_stats["execs_per_sec"] }}</td>
+    <td>{{ binary_data.fuzz_stats["fuzzers"] }}</td>
+    <td>{{ binary_data.fuzz_stats["pending_total"] }}</td>
+    <td>{{ binary_data.fuzz_stats["pending_favs"] }}</td>
+    <td>{{ binary_data.fuzz_stats["paths_total"] }}</td>
+    <td>{{ binary_data.fuzz_stats["unique_crashes"] }}</td>
+    {% if binary_data.took_max_file %}
+        <td class="text-center"><a href="/fexm/{{ package_data.name }}/{{ binary_name }}/timewarp">Timewarp!</a>
+        </td>
+    {% else %}
+        <td>Not required :)</td>
+    {% endif %}
+    </tr>
+    </tbody>
+</table>
+
+{% if binary_data and binary_data.crashes_list %}
+    <table class="table">
+        <tr>
+            <th>Parameter</th>
+            <th>Exploitability</th>
+            <th>Description</th>
+            <th>Download Link</th>
+            <th>Log</th>
+        </tr>
+        {% for crash in binary_data.crashes_list %}
+            {% if crash.exploitability == "EXPLOITABLE" %}
+                <tr class="danger">
+                    {% elif crash.exploitability == "PROBABLY_EXPLOITABLE" %}
+                <tr class="danger">
+                    {% elif crash.exploitability == "UNKNOWN" %}
+                <tr class="warning">
+                    {% elif crash.exploitability == "PROBABLY_NOT_EXPLOITABLE" %}
+                <tr class="info">
+                    {% elif crash.exploitability == "NOT_EXPLOITABLE" %}
+                <tr class="info">
+                    {% else %}
+                <tr class="success">
+            {% endif %}
+        <td>{{ binary_data.path }}</td>
+        <td>{{ crash.exploitability }}</td>
+        <td>{{ crash.description }}</td>
+        <td><a href="/fexm/{{ binary_data.package }}/{{ binary_data.name }}/crashes/{{ crash.file_name }}">Download</a>
+        </td>
+        <td>
+            <button class="btn" id="{{ crash.file_name }}" onclick="on( '{{ crash.file_name }}' )">View crash log
+            </button>
+        </td>
+        <div id="{{ crash.file_name }}" class="overlay card bg-light mb-3"
+             style="white-space: pre-wrap; word-wrap: break-word; max-width:40%;"
+             onclick="off( '{{ crash.file_name }}' )">
+            <div class="card-header">{{ binary_data.name }} {{ binary_data.parameter }}</div><!--
+            -->
+            <div class="card-body"><!--
+              -->{{ crash.execution_output | safe }}
+            </div>
+        </div>
+        </tr>
+        {% endfor %}
+
+    </table>
+{% else %}
+    <p>No crash data available (yet).</p>
+{% endif %}
+
+<script src="/static/libs/jquery.min.js"></script>
+<script src="/static/libs/popper.min.js"></script>
+<script src="/static/libs/bootstrap.min.js"></script>
+<!-- <div id="overlay" onclick="off()" style="white-space: pre-wrap; word-wrap: break-word" > -->
+<!-- </div> -->
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+{
+    "fuzz_dirs": [
+        "testdata/sync"
+    ]
+}

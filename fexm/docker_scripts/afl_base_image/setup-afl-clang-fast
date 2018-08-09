@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Make sure afl-clang-fast will be run. This forces us to set AFL_CC and AFL_CXX or
+# otherwise afl-gcc will be trying to call itself by calling gcc.
+
+echo "export AFL_CC=/usr/sbin/clang" >> /etc/profile.d/afl-sh-profile
+echo "export AFL_CXX=/usr/sbin/clang++" >> /etc/profile.d/afl-sh-profile
+echo "export AFL_CC=/usr/sbin/clang" >> /etc/profile
+echo "export AFL_CXX=/usr/sbin/clang++" >> /etc/profile
+
+rm /usr/bin/cc; ln -s /usr/local/bin/afl-clang-fast /usr/bin/cc
+rm /usr/bin/gcc; ln -s /usr/local/bin/afl-clang-fast /usr/bin/gcc
+rm /usr/bin/g++; ln -s /usr/local/bin/afl-clang-fast++ /usr/bin/g++
+#rm /usr/bin/x86_64-linux-gnu-gcc && cp /usr/bin/afl-clang-fast /usr/bin/x86_64-linux-gnu-gcc
+#rm /usr/bin/x86_64-linux-gnu-g++ && cp /usr/bin/afl-clang-fast++ /usr/bin/x86_64-linux-gnu-g++

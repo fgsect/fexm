@@ -1,0 +1,119 @@
+<html>
+<head>
+    <title>
+        Bug Bounty Bash Board
+    </title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/static/libs/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/libs/dtables/datatables.css">
+    <style type="text/css">
+        td {
+            padding: 0 25px 0 25px;
+        }
+    </style>
+
+</head>
+<body>
+
+{% if package_data %}
+    <h1>Package: {{ package_data.name }}</h1>
+    <h1>Package Status: {{ package_data.current_status }}</h1>
+    <table class="display responsive no-wrap" id="overview">
+
+        <thead>
+        <tr>
+            <th>Binary</th>
+            <th>Unique crashes</th>
+            <th>Worst Crash</th>
+            <th>Total executions</th>
+            <th>Execs/s</th>
+            <th>Fuzzer</th>
+            <th>Pending Total</th>
+            <th>Pending Favs</th>
+            <th>Paths Total</th>
+            <th>Afl unique crashes</th>
+            <th>Timewarp?</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for binary_name, binary_data in package_data.binaries.items() %}
+            {% if binary_data.overall_worst_crash == "EXPLOITABLE" %}
+                {% set ordering = 6 %}
+                <tr rowspan="1" class="danger">
+                    {% elif binary_data.overall_worst_crash == "PROBABLY_EXPLOITABLE" %}
+                    {% set ordering = 5 %}
+                <tr rowspan="1" class="danger">
+                    {% elif binary_data.overall_worst_crash == "UNKNOWN" %}
+                    {% set ordering = 4 %}
+                <tr rowspan="1" class="warning">
+                    {% elif binary_data.overall_worst_crash == "PROBABLY_NOT_EXPLOITABLE" %}
+                    {% set ordering = 3 %}
+                <tr rowspan="1" class="info">
+                    {% elif binary_data.overall_worst_crash == "NOT_EXPLOITABLE" %}
+                    {% set ordering = 2 %}
+                <tr rowspan="1" class="info">
+                    {% else %}
+                    {% set ordering = 1 %}
+                <tr rowspan="1" class="success">
+            {% endif %}
+        <td><a href="/fexm/{{ package_data.name }}/{{ binary_name }}">{{ binary_data.path }}</a></td>
+        <td class="text-center"><a
+                href="/fexm/{{ package_data.name }}/{{ binary_name }}">{{ binary_data.crashes_list | length }}</a></td>
+        <td data-order="{{ ordering }}">{{ binary_data.overall_worst_crash }}</td>
+        <td>{{ binary_data.fuzz_stats["execs_done"] }}</td>
+        <td>{{ binary_data.fuzz_stats["execs_per_sec"] }}</td>
+        <td>{{ binary_data.fuzz_stats["fuzzers"] }}</td>
+        <td>{{ binary_data.fuzz_stats["pending_total"] }}</td>
+        <td>{{ binary_data.fuzz_stats["pending_favs"] }}</td>
+        <td>{{ binary_data.fuzz_stats["paths_total"] }}</td>
+        <td>{{ binary_data.fuzz_stats["unique_crashes"] }}</td>
+        {% if binary_data.took_max_file %}
+            <td class="text-center"><a href="/fexm/{{ package_data.name }}/{{ binary_name }}/timewarp">Timewarp!</a>
+            </td>
+        {% else %}
+            <td>Not required :)</td>
+        {% endif %}
+        </tr>
+
+        {% endfor %}
+        </tbody>
+
+
+    </table>
+{% else %}
+    <p>No data are available.</p>
+{% endif %}
+</body>
+
+<script src="/static/libs/jquery.min.js"></script>
+<script src="/static/libs/bootstrap.min.js"></script>
+<script src="/static/libs/dtables/datatables.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#overview').DataTable({
+            responsive: true,
+            "rowCallback": function (row, data, index) {
+                console.log(data[2]);
+                if (data[2].display === "EXPLOITABLE") {
+                    $('td', row).addClass("text-danger");
+                }
+                else if (data[2].display === "PROBABLY_EXPLOITABLE") {
+                    $('td', row).addClass('text-danger');
+                } else if (data[2].display === "UNKNOWN") {
+                    $('td', row).addClass('text-warning');
+                } else if (data[2].display === "PROBABLY_NOT_EXPLOITABLE") {
+                    $('td', row).addClass('text-info');
+                } else if (data[2].display === "NOT_EXPLOITABLE") {
+                    $('td', row).addClass('text-info');
+                } else {
+                    $('td', row).addClass('text-success');
+                }
+            },
+            "aaSorting": [[2, 'desc'], [1, 'desc']]
+        });
+    });
+</script>
+</html>

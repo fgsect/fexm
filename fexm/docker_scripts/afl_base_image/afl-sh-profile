@@ -1,0 +1,28 @@
+##!/bin/sh
+
+#export CC=afl-clang-fast
+#export CXX=afl-clang-fast++
+
+# NOTE: we're skipping tests to speed things up.
+#export DEB_BUILD_OPTIONS=nocheck
+
+# Exit AFL if we hadn't seen any new paths for a long time.
+#export AFL_EXIT_WHEN_DONE=1
+
+#export FORCE_UNSAFE_CONFIGURE=1  # for coreutils root build check.
+
+# we don't need leak checks while building
+#export ASAN_OPTIONS=detect_leaks=0,abort_on_error=1,symbolize=0
+
+# In case of e.g. gimp, dpkg-gensymbols complains after having detected new
+# symbols introduced by AFL. Let's disable the check.
+#export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+
+# I don't like to deal with cpufreq, let's just ignore it. Feel free to remove
+# this line if you like.
+#export AFL_SKIP_CPUFREQ=1
+
+# We overwrote /usr/bin/gcc, so we need to specify AFL_CC to avoid afl-gcc
+# calling itself.
+#
+# NOTE: This is generated in Dockerfile.

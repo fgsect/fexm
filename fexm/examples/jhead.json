@@ -1,0 +1,13 @@
+{
+  "base_image":"pacmanfuzzer",
+  "out_dir":"../fxm_data",
+  "fuzz_duration":10,
+  "packages":["jhead"],
+  "max_build_threshold":1000000000000,
+  "max_install_threshold":10000000000,
+  "seeds":"../seeds",
+  "force":true,
+  "USE_ASAN":true,
+  "fuzzing_cores_per_binary":2,
+  "qemu":false
+}

@@ -1,0 +1,20 @@
+{
+    "afl_margs": "-T banner",
+    "dumb": true,
+    "timeout": "200+",
+    "dict": "dict/target.dict",
+    "file": "@@",
+    "interactive": true,
+    "target": "/usr/bin/target",
+    "input": "./in",
+    "cmdline": "-a -b -c -d",
+    "session": "SESSION",
+    "qemu": true,
+    "output": "./out",
+    "dirty": true,
+    "mem_limit": "150",
+    "master_instances": 2,
+    "environment": [
+        "AFL_PERSISTENT=1"
+    ]
+}

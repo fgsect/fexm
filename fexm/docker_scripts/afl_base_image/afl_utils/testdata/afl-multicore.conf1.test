@@ -1,0 +1,12 @@
+{
+    "target": "/usr/bin/target",
+    "input": "./in",
+    "cmdline": "-a -b -c -d",
+    "session": "SESSION",
+    "output": "./out",
+    "interactive": false,
+    "master_instances": 0,
+    "environment": [
+        "AFL_PERSISTENT=1"
+    ]
+}

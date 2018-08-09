@@ -1,0 +1,6 @@
+{
+  "name": "top500",
+  "fuzz_manager": "pacman",
+  "packages_file": "/fexm/examples/top500.txt",
+  "base_image": "pacmanfuzzer"
+}

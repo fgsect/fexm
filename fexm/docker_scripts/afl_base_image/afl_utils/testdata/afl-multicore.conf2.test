@@ -1,0 +1,6 @@
+{
+    "target": "/usr/bin/target",
+    "input": "./in",
+    "cmdline": "-a -b -c -d",
+    "output": "./out"
+}

@@ -1,0 +1,11 @@
+{
+  "docker_image": "pacmanfuzzer",
+  "out_dir": "out",
+  "fuzz_duration": 5,
+  "packages_file": "jhead.txt",
+  "max_build_size": 1000000000000,
+  "MAX_SIZE": 10000000000,
+  "seeds": "/seeds",
+  "force": true,
+  "USE_ASAN": true
+}

@@ -1,0 +1,76 @@
+<html>
+<head>
+    <title>
+        Bug Bounty Bash Board
+    </title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/static/libs/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/libs/dtables/datatables.css">
+
+</head>
+<body>
+<style type="text/css">
+    td {
+        padding: 0 25px 0 25px;
+    }
+
+    pre {
+        background-color: black;
+        padding: 15px;
+    }
+
+    .stdio {
+        height: 60%;
+    }
+
+</style>
+
+
+<div style="alignment: center; text-align: center; height: 100%; width: 100%;">
+    {% if timewarp_data %}
+        <h1>Package: {{ binary_data.package }}, Binary: {{ binary_data.name }}, Version: {{ binary_data.package_version }}</h1>
+        <h2>AFL-Timewarp for {{ timewarp_data.name }} started.</h2>
+        <br>
+        <p>STDIO (0xAF0):</p>
+        <div class="stdio">
+            <pre id="stdio"></pre>
+        </div>
+        <br>
+        <p>CnC (0xAF1):</p>
+        <a href="/fexm/{{ binary_data.package }}/{{ binary_data.name }}/" role=button class=".btn-default">Learn Seeds / Warp</a>
+        <a href="/fexm/{{ binary_data.package }}/{{ binary_data.name }}/timewarp/start_fuzzing/{{ timewarp_data.cnc_raw }}" role=button class=".btn-success">Start Fuzzing</a>
+        <p>Enjoy :)</p>
+    {% else %}
+        Timewarp not available for the current package.
+    {% endif %}
+</div>
+
+<script src="/static/libs/jquery.min.js"></script>
+<script src="/static/libs/bootstrap.min.js"></script>
+<script src="/static/libs/dtables/datatables.js"></script>
+<script src="/static/libs/popper.min.js"></script>
+
+<script src="/static/ws/websock.js"></script>
+<script src="/static/ws/keysym.js"></script>
+<script src="/static/ws/VT100.js"></script>
+<script src="/static/ws/wstelnet.js"></script>
+
+<script src="/static/timewarp.js"></script>
+
+<script type="text/javascript">
+window.onload = function () {
+    //var url = document.location.href;
+    //$('#host')[0].value = (url.match(/host=([^&#]*)/) || ['', ''])[1];
+    //$('#port')[0].value = (url.match(/port=([^&#]*)/) || ['', ''])[1];
+
+    {% if timewarp_data %}
+    var tw = new Timewarp($("#stdio"), {{ timewarp_data.stdio }});
+    {% endif %}
+
+}
+</script>
+
+</body>
+</html>

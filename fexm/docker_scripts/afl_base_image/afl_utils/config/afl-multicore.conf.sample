@@ -1,0 +1,21 @@
+{
+    "session": "SESSION",
+    "input": "./in",
+    "output": "./out",
+    "target": "/usr/bin/target",
+    "cmdline": "-a -b -c -d",
+    "file": "@@",
+    "timeout": "200+",
+    "mem_limit": "150",
+    "qemu": false,
+    "afl_margs": "-T banner",
+    "dirty": false,
+    "dumb": false,
+    "dict": "dict/target.dict",
+    "master_instances": 1,
+    "interactive": true,
+    "environment": [
+        "AFL_PERSISTENT=1",
+        "LD_PRELOAD=desock.so"
+    ]
+}

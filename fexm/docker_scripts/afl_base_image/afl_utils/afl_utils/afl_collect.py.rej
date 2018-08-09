@@ -1,0 +1,264 @@
+--- afl_collect.py  2017-07-04 19:50:01.000000000 +0200
++++ afl_collect.py   2018-07-17 19:29:55.884777180 +0200
+@@ -27,6 +27,10 @@
+ from afl_utils.AflPrettyPrint import clr, print_ok, print_err, print_warn
+ from db_connectors import con_sqlite
+ 
++import random
++import string
++import glob
++
+ # afl-collect global settings
+ global_crash_subdirs = "crashes"
+ global_queue_subdirs = "queue"
+@@ -35,6 +39,7 @@
+ ]
+ 
+ fuzzer_stats_filename = "fuzzer_stats"
++asan_log_tmpstring = "aflutils.tmp"
+ 
+ # gdb settings
+ 
+@@ -173,7 +178,8 @@
+     return not ("@@" in target_cmd)
+ 
+ 
+-def generate_gdb_exploitable_script(script_filename, sample_index, target_cmd, script_id=0, intermediate=False):
++def generate_gdb_exploitable_script(script_filename, sample_index, target_cmd, script_id=0, intermediate=False,
++                                    asan_mode=False):
+     target_cmd = target_cmd.split()
+     gdb_target_binary = target_cmd[0]
+     gdb_run_cmd = " ".join(target_cmd[1:])
+@@ -200,6 +206,11 @@
+         if gdb_exploitable_path:
+             fd.writelines("source %s\n" % gdb_exploitable_path)
+ 
++        if asan_mode:
++            fd.writelines("set pagination off\n")
++            asan_logname = '/tmp/{}.{}'.format(asan_log_tmpstring, ''.join(random.choice(string.ascii_lowercase
++                                                    + string.digits) for _ in range(10)))
++
+         # load executable
+         fd.writelines("file %s\n" % gdb_target_binary)
+         # </script_header>
+@@ -208,10 +219,16 @@
+         for f in sample_index.index:
+             fd.writelines("echo Crash\ sample:\ '%s'\\n\n" % f['output'])
+ 
+-            if not stdin_mode(target_cmd):
+-                run_cmd = "run " + gdb_run_cmd + "\n"
++            if not asan_mode:
++                if not stdin_mode(target_cmd):
++                    run_cmd = "run " + gdb_run_cmd + "\n"
++                else:
++                    run_cmd = "run " + gdb_run_cmd + "< @@" + "\n"
+             else:
+-                run_cmd = "run " + gdb_run_cmd + "< @@" + "\n"
++                if not stdin_mode(target_cmd):
++                    run_cmd = "run " + gdb_run_cmd + " 2> {}".format(asan_logname) + "\n"
++                else:
++                    run_cmd = "run " + gdb_run_cmd + "< @@" + " 2> {}".format(asan_logname) + "\n"
+ 
+             if intermediate:
+                 run_cmd = run_cmd.replace("@@", "'{}'".format(f['input']))
+@@ -219,7 +236,10 @@
+                 run_cmd = run_cmd.replace("@@", os.path.join(sample_index.output_dir, "'{}'".format(f['output'])))
+ 
+             fd.writelines(run_cmd)
+-            fd.writelines("exploitable\n")
++            if not asan_mode:
++                fd.writelines("exploitable\n")
++            else:
++                fd.writelines("exploitable -a {}\n".format(asan_logname))
+ 
+         # <script_footer>
+         fd.writelines("quit")
+@@ -231,7 +251,7 @@
+ 
+ 
+ # ok, this needs improvement!!!
+-def execute_gdb_script(out_dir, script_filename, num_samples, num_threads):
++def execute_gdb_script(out_dir, script_filename, num_samples, num_threads, asan_mode=False):
+     classification_data = []
+ 
+     out_dir = os.path.expanduser(out_dir) + "/"
+@@ -321,6 +341,11 @@
+     for n in range(0, num_threads, 1):
+         os.remove(os.path.join(out_dir, "%s.%d" % (script_filename, n)))
+ 
++    # remove tmp asan logs
++    if asan_mode:
++        for tmpfile in glob.glob("/tmp/{}*".format(asan_log_tmpstring)):
++            os.remove(tmpfile)
++
+     return classification_data
+ 
+ 
+@@ -365,6 +390,8 @@
+ effect without '-r'.")
+     parser.add_argument("target_cmd", nargs="+", help="Path to the target binary and its command line arguments. \
+ Use '@@' to specify crash sample input file position (see afl-fuzz usage).")
++    parser.add_argument("-a", "--asan-mode", dest="asan_mode", action="store_const", const=True, default=False,
++                        help="Run afl-collect in ASan mode (classify exploitability of ASan crashes)")
+ 
+     args = parser.parse_args(argv[1:])
+ 
+@@ -447,11 +474,11 @@
+ 
+         for i in range(0, int(args.num_threads), 1):
+             generate_gdb_exploitable_script(os.path.join(out_dir, args.gdb_expl_script_file), divided_index[i],
+-                                            args.target_cmd, i, intermediate=True)
++                                            args.target_cmd, i, intermediate=True, asan_mode=args.asan_mode)
+ 
+         # execute gdb+exploitable script
+         classification_data = execute_gdb_script(out_dir, args.gdb_expl_script_file, len(sample_index.inputs()),
+-                                                 int(args.num_threads))
++                                                 int(args.num_threads), asan_mode=args.asan_mode)
+ 
+         # Submit crash classification data into database
+         if db_file:
+@@ -493,9 +520,10 @@
+ 
+         # generate output gdb script
+         generate_gdb_exploitable_script(os.path.join(out_dir, args.gdb_expl_script_file), sample_index,
+-                                        args.target_cmd, 0)
++                                        args.target_cmd, 0, asan_mode=args.asan_mode)
+     elif args.gdb_script_file:
+-        generate_gdb_exploitable_script(os.path.join(out_dir, args.gdb_script_file), sample_index, args.target_cmd)
++        generate_gdb_exploitable_script(os.path.join(out_dir, args.gdb_script_file), sample_index, args.target_cmd,
++                                        asan_mode=args.asan_mode)
+ 
+     print_ok("Copying %d samples into output directory..." % len(sample_index.index))
+     files_collected = copy_samples(sample_index)
+--- afl_collect.py  2017-07-04 19:50:01.000000000 +0200
++++ afl_collect.py   2018-07-17 19:29:55.884777180 +0200
+@@ -27,6 +27,10 @@
+ from afl_utils.AflPrettyPrint import clr, print_ok, print_err, print_warn
+ from db_connectors import con_sqlite
+ 
++import random
++import string
++import glob
++
+ # afl-collect global settings
+ global_crash_subdirs = "crashes"
+ global_queue_subdirs = "queue"
+@@ -35,6 +39,7 @@
+ ]
+ 
+ fuzzer_stats_filename = "fuzzer_stats"
++asan_log_tmpstring = "aflutils.tmp"
+ 
+ # gdb settings
+ 
+@@ -173,7 +178,8 @@
+     return not ("@@" in target_cmd)
+ 
+ 
+-def generate_gdb_exploitable_script(script_filename, sample_index, target_cmd, script_id=0, intermediate=False):
++def generate_gdb_exploitable_script(script_filename, sample_index, target_cmd, script_id=0, intermediate=False,
++                                    asan_mode=False):
+     target_cmd = target_cmd.split()
+     gdb_target_binary = target_cmd[0]
+     gdb_run_cmd = " ".join(target_cmd[1:])
+@@ -200,6 +206,11 @@
+         if gdb_exploitable_path:
+             fd.writelines("source %s\n" % gdb_exploitable_path)
+ 
++        if asan_mode:
++            fd.writelines("set pagination off\n")
++            asan_logname = '/tmp/{}.{}'.format(asan_log_tmpstring, ''.join(random.choice(string.ascii_lowercase
++                                                    + string.digits) for _ in range(10)))
++
+         # load executable
+         fd.writelines("file %s\n" % gdb_target_binary)
+         # </script_header>
+@@ -208,10 +219,16 @@
+         for f in sample_index.index:
+             fd.writelines("echo Crash\ sample:\ '%s'\\n\n" % f['output'])
+ 
+-            if not stdin_mode(target_cmd):
+-                run_cmd = "run " + gdb_run_cmd + "\n"
++            if not asan_mode:
++                if not stdin_mode(target_cmd):
++                    run_cmd = "run " + gdb_run_cmd + "\n"
++                else:
++                    run_cmd = "run " + gdb_run_cmd + "< @@" + "\n"
+             else:
+-                run_cmd = "run " + gdb_run_cmd + "< @@" + "\n"
++                if not stdin_mode(target_cmd):
++                    run_cmd = "run " + gdb_run_cmd + " 2> {}".format(asan_logname) + "\n"
++                else:
++                    run_cmd = "run " + gdb_run_cmd + "< @@" + " 2> {}".format(asan_logname) + "\n"
+ 
+             if intermediate:
+                 run_cmd = run_cmd.replace("@@", "'{}'".format(f['input']))
+@@ -219,7 +236,10 @@
+                 run_cmd = run_cmd.replace("@@", os.path.join(sample_index.output_dir, "'{}'".format(f['output'])))
+ 
+             fd.writelines(run_cmd)
+-            fd.writelines("exploitable\n")
++            if not asan_mode:
++                fd.writelines("exploitable\n")
++            else:
++                fd.writelines("exploitable -a {}\n".format(asan_logname))
+ 
+         # <script_footer>
+         fd.writelines("quit")
+@@ -231,7 +251,7 @@
+ 
+ 
+ # ok, this needs improvement!!!
+-def execute_gdb_script(out_dir, script_filename, num_samples, num_threads):
++def execute_gdb_script(out_dir, script_filename, num_samples, num_threads, asan_mode=False):
+     classification_data = []
+ 
+     out_dir = os.path.expanduser(out_dir) + "/"
+@@ -321,6 +341,11 @@
+     for n in range(0, num_threads, 1):
+         os.remove(os.path.join(out_dir, "%s.%d" % (script_filename, n)))
+ 
++    # remove tmp asan logs
++    if asan_mode:
++        for tmpfile in glob.glob("/tmp/{}*".format(asan_log_tmpstring)):
++            os.remove(tmpfile)
++
+     return classification_data
+ 
+ 
+@@ -365,6 +390,8 @@
+ effect without '-r'.")
+     parser.add_argument("target_cmd", nargs="+", help="Path to the target binary and its command line arguments. \
+ Use '@@' to specify crash sample input file position (see afl-fuzz usage).")
++    parser.add_argument("-a", "--asan-mode", dest="asan_mode", action="store_const", const=True, default=False,
++                        help="Run afl-collect in ASan mode (classify exploitability of ASan crashes)")
+ 
+     args = parser.parse_args(argv[1:])
+ 
+@@ -447,11 +474,11 @@
+ 
+         for i in range(0, int(args.num_threads), 1):
+             generate_gdb_exploitable_script(os.path.join(out_dir, args.gdb_expl_script_file), divided_index[i],
+-                                            args.target_cmd, i, intermediate=True)
++                                            args.target_cmd, i, intermediate=True, asan_mode=args.asan_mode)
+ 
+         # execute gdb+exploitable script
+         classification_data = execute_gdb_script(out_dir, args.gdb_expl_script_file, len(sample_index.inputs()),
+-                                                 int(args.num_threads))
++                                                 int(args.num_threads), asan_mode=args.asan_mode)
+ 
+         # Submit crash classification data into database
+         if db_file:
+@@ -493,9 +520,10 @@
+ 
+         # generate output gdb script
+         generate_gdb_exploitable_script(os.path.join(out_dir, args.gdb_expl_script_file), sample_index,
+-                                        args.target_cmd, 0)
++                                        args.target_cmd, 0, asan_mode=args.asan_mode)
+     elif args.gdb_script_file:
+-        generate_gdb_exploitable_script(os.path.join(out_dir, args.gdb_script_file), sample_index, args.target_cmd)
++        generate_gdb_exploitable_script(os.path.join(out_dir, args.gdb_script_file), sample_index, args.target_cmd,
++                                        asan_mode=args.asan_mode)
+ 
+     print_ok("Copying %d samples into output directory..." % len(sample_index.index))
+     files_collected = copy_samples(sample_index)

@@ -1,0 +1,15 @@
+jhead
+unidef
+gdbm
+sqlite
+bzip2
+tar
+xz
+gawk
+pci
+bash
+tcpdump
+giflib
+libxml2
+webkit2gtk
+gzip

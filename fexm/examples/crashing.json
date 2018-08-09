@@ -1,0 +1,13 @@
+{
+  "docker_image": "pacmanfuzzer",
+  "out_dir": "/data",
+  "fuzz_duration": 20,
+  "packages_file": "/fexm/examples/crashing_packages.txt",
+  "max_build_size": 1000000000000,
+  "MAX_SIZE": 10000000000,
+  "seeds": "/seeds",
+  "force": false,
+  "fuzzing_cores_per_binary":7,
+  "USE_ASAN": true,
+  "qemu": false
+}

@@ -1,0 +1,5 @@
+{
+  "name":"jhead",
+  "fuzz_manager": "byob",
+  "fuzz_duration": 1
+}

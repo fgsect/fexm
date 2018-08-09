@@ -1,0 +1,1 @@
+{"package_folder": "/data/jhead", "qemu": false, "fuzzing_cores_per_binary": 1, "fuzz_duration": 2700, "package": "jhead", "asan": true, "exec_timeout": "1000+", "seeds": "/fuzz/seeds", "volume": "/results"}

@@ -1,0 +1,107 @@
+<html>
+<head>
+    <title>
+        Bug Bounty Bash Board
+    </title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/static/libs/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/libs/dtables/datatables.css">
+
+    <style type="text/css">
+        td {
+            padding: 0 25px 0 25px;
+        }
+    </style>
+
+</head>
+<body>
+
+<table class="display responsive no-wrap" id="overview">
+    <thead>
+    <tr>
+        <th>Package</th>
+        <th>Package Usage</th>
+        <!-- <th>Version</th> -->
+        <th>Package Worst Crash</th>
+        <th>Total number of crashing binaries</th>
+        <th>Total number of crashes</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if data_list %}
+        {% for package in data_list %}
+
+            {% if package.overall_worst_crash == "EXPLOITABLE" %}
+                <tr rowspan="1" class="danger">
+                    {% set ordering = 6 %}
+                    {% elif package.overall_worst_crash == "PROBABLY_EXPLOITABLE" %}
+                <tr rowspan="1" class="danger">
+                    {% set ordering = 5 %}
+                    {% elif package.overall_worst_crash == "UNKNOWN" %}
+                <tr rowspan="1" class="warning">
+                    {% set ordering = 4 %}
+                    {% elif package.overall_worst_crash == "PROBABLY_NOT_EXPLOITABLE" %}
+                <tr rowspan="1" class="info">
+                    {% set ordering = 3 %}
+                    {% elif package.overall_worst_crash == "NOT_EXPLOITABLE" %}
+                <tr rowspan="1" class="info">
+                    {% set ordering = 2 %}
+                    {% else %}
+                <tr rowspan="1" class="success">
+                {% set ordering = 1 %}
+            {% endif %}
+        <td><b><a href="/fexm/{{ package.name }}">{{ package.name }}</a></b>
+
+        </td>
+        <td data-order={{ package.usage }}>{{ package.usage }}</td>
+
+        <!-- <td>{{ package.version }}</td> -->
+
+        <td data-order="{{ ordering }}">{{ package.overall_worst_crash }}</td>
+        <td>{{ package.total_number_of_crashing_binaries }}</td>
+        <td>{{ package.total_number_of_crashes }}</td>
+        <td>{{ package.current_status }}</td>
+        </tr>
+
+        {% endfor %}
+        </tbody>
+    {% else %}
+        <p>No data are available.</p>
+    {% endif %}
+</table>
+
+<script src="/static/libs/jquery.min.js"></script>
+<script src="/static/libs/bootstrap.min.js"></script>
+<script src="/static/libs/dtables/datatables.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#overview').DataTable({
+            responsive: true,
+            "rowCallback": function (row, data, index) {
+                console.log(data[4]);   
+                if (data[2].display === "EXPLOITABLE") {
+                    $('td', row).addClass("text-danger");
+                }
+                else if (data[2].display === "PROBABLY_EXPLOITABLE") {
+                    $('td', row).addClass('text-danger');
+                } else if (data[2].display === "UNKNOWN") {
+                    $('td', row).addClass('text-warning');
+                } else if (data[2].display === "PROBABLY_NOT_EXPLOITABLE") {
+                    $('td', row).addClass('text-info');
+                } else if (data[2].display === "NOT_EXPLOITABLE") {
+                    $('td', row).addClass('text-info');
+                } else {
+                    $('td', row).addClass('text-success');
+                }
+            },
+            "aaSorting": [[3, 'desc'], [5, 'desc']]
+        });
+    });
+</script>
+
+</body>
+</html>
