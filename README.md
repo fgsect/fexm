@@ -184,7 +184,7 @@ A: You need to run `fexm init pacmanfuzzer` once before fuzzing.
 
 * **Vincent Ulitzsch** - [@viniul](https://github.com/viniul)
 * **Dominik Maier** - [@domenukk](https://github.com/domenukk)
-* **Bhargava Shastry** - [@bshashtry](https://github.com/bshastry)
+* **Bhargava Shastry** - [@bshastry](https://github.com/bshastry)
 
 See also the list of [contributors](https://github.com/fgsect/fexm/contributors) who participated in this project.
 
