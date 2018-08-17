@@ -1,6 +1,6 @@
 # FuzzExMachina 
 
-![FExM](fexm.svg?raw=true)
+![FExM](fexm.png?raw=true)
 FExM simplifies basic fuzzing pipelines. As result of years of practical fuzz testing, it provides a best effort approach 
 able to get running quickly and finding bugs in most applications. 
 Given its fully automated nature, it can be used to fuzz complete software repositories and distributions as well as single programs.
