@@ -1,6 +1,6 @@
 # FuzzExMachina 
 
-![FExM](fexm.svg?raw=true)
+![FExM](fexm.png?raw=true)
 FExM simplifies basic fuzzing pipelines. As result of years of practical fuzz testing, it provides a best effort approach 
 able to get running quickly and finding bugs in most applications. 
 Given its fully automated nature, it can be used to fuzz complete software repositories and distributions as well as single programs.
@@ -184,7 +184,7 @@ A: You need to run `fexm init pacmanfuzzer` once before fuzzing.
 
 * **Vincent Ulitzsch** - [@viniul](https://github.com/viniul)
 * **Dominik Maier** - [@domenukk](https://github.com/domenukk)
-* **Bhargava Shastry** - [@bshashtry](https://github.com/bshastry)
+* **Bhargava Shastry** - [@bshastry](https://github.com/bshastry)
 
 See also the list of [contributors](https://github.com/fgsect/fexm/contributors) who participated in this project.
 
@@ -200,4 +200,5 @@ This project is licensed under the APACHE v2 License - see the [LICENSE.md](LICE
 * @lcamtuf for AFL (obviously)
 * Some initial work for the pcap parser was stolen (with permission) from Ben Stock (@kcotsneb)  
 * The GitHub crawler makes use of [sourcecode](https://github.com/tommiu/GithubSpider) by Tommi Unruh
+* https://github.com/d33tah/ for the great aflize script.
 * So many more...
