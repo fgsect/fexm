@@ -5,7 +5,7 @@ ENV REFRESHED_AT 2018-07-28
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV AFL_INSTALL https://https://github.com/domenukk/afl-timewarp-qemu.git
+ENV AFL_INSTALL git@github.com:domenukk/afl-timewarp.git
 
 # Update and install minimal
 #
