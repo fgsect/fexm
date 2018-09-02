@@ -200,4 +200,5 @@ This project is licensed under the APACHE v2 License - see the [LICENSE.md](LICE
 * @lcamtuf for AFL (obviously)
 * Some initial work for the pcap parser was stolen (with permission) from Ben Stock (@kcotsneb)  
 * The GitHub crawler makes use of [sourcecode](https://github.com/tommiu/GithubSpider) by Tommi Unruh
+* https://github.com/d33tah/ for the great aflize script.
 * So many more...
