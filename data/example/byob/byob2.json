@@ -1,7 +1,0 @@
-{
-  "name":"jhead",
-  "fuzz_manager": "byob",
-  "seeds": "../fxm-seeds",
-  "out_dir": "../fxm-data",
-  "fuzz_duration": 1
-}
