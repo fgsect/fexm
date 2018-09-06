@@ -162,7 +162,7 @@ class PacmanFuzzer:
                                     os.path.realpath(os.path.join(os.getcwd() + "/", self.configuration_dir)),
                                     os.path.realpath(os.path.join(os.getcwd() + "/", self.seeds)), self.fuzz_duration,
                                     self.use_asan,
-                                    self.exec_timeout, force_qemu, self.config_dict))
+                                    self.exec_timeout, force_qemu, {"fuzzing_cores_per_binary": self.config_dict["fuzzing_cores_per_binary"]}))
         jobs = celery.group(tasks)
         results = jobs.apply_async()
         results.get()
