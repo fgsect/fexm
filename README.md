@@ -54,7 +54,7 @@ First, you will need to acquire seeds that will then be fed into the FExM.
 
 For this, FExM provides a github crawler.
 
-To do that, create an an [auth token](https://github.com/settings/tokens) at GitHub.
+To do that, create an [auth token](https://github.com/settings/tokens) at GitHub.
    
 Afterwards, run 
 ```sh
