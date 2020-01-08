@@ -64,5 +64,5 @@ tldextract==2.1.0
 twitter==1.18.0
 vine==1.1.4
 websocket-client==0.48.0
-Werkzeug==0.14.1
+Werkzeug==0.15.3
 websockify==0.8.0
