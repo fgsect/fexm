@@ -51,7 +51,7 @@ pyparsing==2.2.0
 pytest==3.6.3
 python-dateutil==2.7.3
 pytz==2018.5
-PyYAML==5.1
+PyYAML==5.4
 requests==2.20.0
 requests-file==1.4.2
 scipy==0.19.1
