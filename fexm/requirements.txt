@@ -45,7 +45,7 @@ pluggy==0.6.0
 pox==0.2.4
 ppft==1.6.4.8
 ptyprocess==0.6.0
-py==1.5.4
+py==1.10.0
 py-ms-cognitive==0.4.0
 pyparsing==2.2.0
 pytest==3.6.3
