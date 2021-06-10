@@ -12,7 +12,7 @@ coverage==4.5.1
 cycler==0.10.0
 Cython==0.28.4
 dill==0.2.8.2
-Django==2.2.13
+Django==2.2.24
 docker==3.4.1
 docker-compose==1.22.0
 docker-pycreds==0.3.0
