@@ -6,7 +6,7 @@ attrs==18.1.0
 beautifulsoup4==4.6.0
 billiard==3.5.0.4
 cached-property==1.4.3
-celery==4.2.1
+celery==5.2.2
 click==6.7
 coverage==4.5.1
 cycler==0.10.0
