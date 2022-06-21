@@ -32,7 +32,7 @@ matplotlib==2.2.2
 matplotlib2tikz==0.6.17
 more-itertools==4.2.0
 multiprocess==0.70.6.1
-numpy==1.15.0
+numpy==1.22.0
 olefile==0.45.1
 packaging==17.1
 pandas==0.23.3
